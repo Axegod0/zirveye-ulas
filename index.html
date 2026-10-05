@@ -211,6 +211,19 @@
             }
         }, {passive: false});
 
+        canvas.addEventListener('touchmove', (e) => {
+            if (gameState !== 'playing') return;
+            e.preventDefault();
+            keys.left = false;
+            keys.right = false;
+            // Ekranda parmak kaydırıldığında da yönü güncelle
+            for (let i = 0; i < e.touches.length; i++) {
+                const touchX = e.touches[i].clientX;
+                if (touchX < cw / 2) keys.left = true;
+                else keys.right = true;
+            }
+        }, {passive: false});
+
         // Keyboard Fallback for desktop testing
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;

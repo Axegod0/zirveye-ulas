@@ -72,7 +72,7 @@
             <h1 class="text-2xl font-bold text-gray-800 mb-2" id="menuTitle">Yukarı Zıpla!</h1>
             <p class="text-gray-600 mb-6 text-sm" id="menuDesc">
                 Ekranın <b>Soluna</b> ve <b>Sağına</b> dokunarak karakteri yönlendir.<br><br>
-                500 puana ulaşınca seni bir <b>sürpriz</b> bekliyor!
+                Bakalım ne kadar yükseğe çıkabileceksin!
             </p>
             <button id="startBtn" class="w-full py-3 px-6 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg transition-transform transform active:scale-95">
                 Oyuna Başla
@@ -177,8 +177,8 @@
         const GRAVITY = 0.4;      // was 0.45
         const JUMP_POWER = -10.5; // was -11
         const MOVE_SPEED = 7.5;   // was 6 (hızı artırdık)
-        const MAX_SCORE = 500;
         
+
         let score = 0;
         let gameState = 'menu'; // menu, playing, gameover, won
         let cameraY = 0;
@@ -289,10 +289,17 @@
         let collectibles = [];
 
         function createPlatform(x, y, isFinal = false) {
+            // Zorluk arttıkça genişlik daralacak.
+            let difficulty = Math.min(score / 3000, 0.7); // 3000 puanda en zor
+            let baseW = cw < 600 ? 90 : 70;
+            let randW = cw < 600 ? 40 : 30;
+            let finalWidth = (baseW + Math.random() * randW) * (1 - difficulty);
+            if (finalWidth < 25) finalWidth = 25; // minimum genişlik
+            
             return {
                 x: x,
                 y: y,
-                width: isFinal ? cw * 0.8 : (cw < 600 ? 90 + Math.random() * 40 : 70 + Math.random() * 30),
+                width: isFinal ? cw * 0.8 : finalWidth,
                 height: isFinal ? 40 : 15,
                 isFinal: isFinal,
                 draw() {
@@ -489,7 +496,12 @@
             // Generate new platforms dynamically
             if (!finalPlatformSpawned) {
                 while (highestPlatformY > 0) {
-                    let newY = highestPlatformY - (Math.random() * 50 + 60);
+                    // Puan arttıkça platformlar arası mesafe artar
+                    let difficulty = Math.min(score / 3000, 1);
+                    let gapMin = 60 + (difficulty * 50); // Maks 110
+                    let gapRand = 50 + (difficulty * 60); // Maks 110
+                    
+                    let newY = highestPlatformY - (Math.random() * gapRand + gapMin);
                     let newX = Math.random() * (cw - 100);
                     platforms.push(createPlatform(newX, newY));
                     highestPlatformY = newY;
@@ -498,13 +510,7 @@
                         collectibles.push({ x: newX + 20, y: newY - 35, size: 24, collected: false });
                     }
                 }
-
-                // Check Win Condition Threshold
-                if (score >= MAX_SCORE) {
-                    finalPlatformSpawned = true;
-                    // Spawn huge final platform just above current view
-                    platforms.push(createPlatform(cw * 0.1, -150, true));
-                }
+                // Oyun artık bitmiyor (win condition kaldırıldı)
             }
 
             player.draw();

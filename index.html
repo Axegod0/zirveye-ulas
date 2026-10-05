@@ -3,639 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zirveye Ulaş</title>
+    <title>Eğlence Merkezi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Press+Start+2P&family=Cinzel:wght@700&display=swap');
         
-        body, html {
+        body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #e0f2fe; /* Tailwind sky-100 */
-            touch-action: none; /* Prevent scroll/zoom on touch */
             font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top right, #e0e7ff, #f8fafc);
         }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
+        .game-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
         }
 
-        .pixel-font {
+        .jump-font {
             font-family: 'Press Start 2P', cursive;
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        @keyframes pulse-heart {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .animate-heartbeat {
-            animation: pulse-heart 1.5s infinite ease-in-out;
-        }
-        
-        @keyframes float-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-float {
-            animation: float-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .tarot-font {
+            font-family: 'Cinzel', serif;
         }
     </style>
 </head>
 <body>
 
-    <!-- Game Canvas -->
-    <canvas id="gameCanvas"></canvas>
-
-    <!-- Score Overlay -->
-    <div id="scoreDisplay" class="absolute top-6 left-6 text-2xl md:text-4xl font-bold text-sky-900 drop-shadow-md pixel-font pointer-events-none z-10">
-        0
-    </div>
-
-    <!-- Start / Game Over Screen -->
-    <div id="menuScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm z-20 transition-opacity duration-300">
-        <div class="glass-panel p-8 rounded-3xl shadow-2xl text-center max-w-sm w-[90%] animate-float">
-            <div class="text-6xl mb-4">👾</div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2" id="menuTitle">Yukarı Zıpla!</h1>
-            <p class="text-gray-600 mb-6 text-sm" id="menuDesc">
-                Ekranın <b>Soluna</b> ve <b>Sağına</b> dokunarak karakteri yönlendir.<br><br>
-                Bakalım ne kadar yükseğe çıkabileceksin!
-            </p>
-            <button id="startBtn" class="w-full py-3 px-6 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg transition-transform transform active:scale-95">
-                Oyuna Başla
-            </button>
-            <div id="whatsappSection" class="hidden flex-col items-center space-y-3 w-full mt-4">
-                <!-- WhatsApp yönlendirme linki -->
-                <a id="waLink" href="https://wa.me/905336775003?text=Düştüm!%20Tekrar%20oynamak%20istiyorum,%20gizli%20kodu%20alabilir%20miyim?" target="_blank" class="w-full py-3 px-6 bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-bold rounded-xl shadow-lg transition-transform transform active:scale-95 flex items-center justify-center gap-2">
-                    <span>WhatsApp'tan Mesaj At</span>
-                </a>
-                <input type="text" id="secretCodeInput" placeholder="Gizli Kodu Gir" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-200 transition-all text-center text-lg font-semibold text-gray-700">
-                <button id="verifyCodeBtn" class="w-full py-3 px-6 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg transition-transform transform active:scale-95">
-                    Kodu Onayla ve Zıpla!
-                </button>
-                <p id="waErrorMsg" class="text-red-500 text-xs hidden">Geçersiz kod! Lütfen doğru kodu girin.</p>
-            </div>
+    <div class="w-full max-w-4xl p-6 flex flex-col items-center">
+        
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 mb-4 tracking-tight">Oyun Seçimi</h1>
+            <p class="text-slate-500 text-lg">Bugün ne oynamak istersin?</p>
         </div>
-    </div>
 
-    <!-- The Grand Prize / Win Screen (Hidden by default) -->
-    <div id="winScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-pink-50/90 backdrop-blur-md z-30 hidden opacity-0 transition-opacity duration-700">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-md w-[90%] border-2 border-pink-100 animate-float">
-            <div class="text-7xl mb-4 animate-heartbeat text-pink-500">❤️</div>
-            <h1 class="text-3xl font-extrabold text-gray-800 mb-2 tracking-tight">Tebrikler!</h1>
-            <p class="text-lg font-medium text-pink-600 mb-4">Zirveye Ulaştın 🏆</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-2xl">
             
-            <div class="bg-pink-50 rounded-xl p-4 mb-6">
-                <p class="text-gray-700 text-sm md:text-base leading-relaxed">
-                    Sistem kusursuz uyumu saptadı.<br>
-                    <b>Büyük Ödül:</b> Benimle bir kahve içmek. ☕
+            <!-- Yukarı Zıpla Card -->
+            <a href="jump.html" class="game-card group relative flex flex-col items-center p-8 bg-white rounded-3xl shadow-xl shadow-sky-100 border border-sky-50 overflow-hidden text-decoration-none">
+                <div class="absolute inset-0 bg-gradient-to-br from-sky-400 to-blue-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                
+                <div class="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform">
+                    👾
+                </div>
+                
+                <h2 class="text-2xl font-bold text-sky-900 mb-3 jump-font text-center text-sm md:text-base leading-relaxed">Yukarı Zıpla</h2>
+                <p class="text-slate-500 text-center text-sm">
+                    Sonsuz bir maceraya atıl! Zıpla, engelleri aş ve ne kadar yükseğe çıkabileceğini göster.
                 </p>
-            </div>
+                
+                <div class="mt-8 px-6 py-2 bg-sky-50 text-sky-600 font-semibold rounded-full group-hover:bg-sky-500 group-hover:text-white transition-colors">
+                    Oyna ➔
+                </div>
+            </a>
 
-            <p class="text-gray-500 text-sm mb-3">Ödülünü almak için numaranı bırakabilirsin:</p>
-            
-            <div id="formContainer" class="space-y-3">
-                <input type="tel" id="phoneNumber" placeholder="555 123 45 67" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-200 transition-all text-center text-lg font-semibold text-gray-700">
-                <button id="submitBtn" class="w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold rounded-xl shadow-lg shadow-pink-500/30 transition-transform transform active:scale-95 flex items-center justify-center">
-                    <span>Gönder</span>
-                </button>
-                <p id="errorMsg" class="text-red-500 text-xs hidden">Lütfen geçerli bir numara girin.</p>
-            </div>
+            <!-- Günün Şans Kartı Card -->
+            <a href="tarot.html" class="game-card group relative flex flex-col items-center p-8 bg-white rounded-3xl shadow-xl shadow-indigo-100 border border-indigo-50 overflow-hidden text-decoration-none">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-800 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                
+                <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform">
+                    🔮
+                </div>
+                
+                <h2 class="text-2xl font-bold text-indigo-900 mb-3 tarot-font text-center">Günün Şans Kartı</h2>
+                <p class="text-slate-500 text-center text-sm">
+                    Geleceğin sana ne fısıldıyor? Gizemli kartlardan birini seç ve kaderinle yüzleş.
+                </p>
+                
+                <div class="mt-8 px-6 py-2 bg-indigo-50 text-indigo-600 font-semibold rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    Kart Seç ➔
+                </div>
+            </a>
 
-            <!-- Success Message -->
-            <div id="successMsg" class="hidden flex-col items-center justify-center py-4">
-                <div class="text-green-500 text-4xl mb-2">✨</div>
-                <p class="text-gray-800 font-bold text-lg">Numaran ulaştı!</p>
-                <p class="text-gray-500 text-sm">En kısa sürede kahve planı için haberleşeceğiz.</p>
-            </div>
         </div>
-        
-        <!-- Confetti Canvas overlay just for the win screen -->
-        <canvas id="confettiCanvas" class="absolute inset-0 pointer-events-none z-40"></canvas>
+
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Configuration injected by environment or mock
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'doodle-date-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        
-        let db = null;
-        let auth = null;
-
-        if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                // Perform anonymous login right away so it's ready
-                signInAnonymously(auth).catch(err => console.error("Auth error", err));
-            } catch (e) {
-                console.warn("Firebase init failed, running in offline mode.");
-            }
-        }
-
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const menuScreen = document.getElementById('menuScreen');
-        const winScreen = document.getElementById('winScreen');
-        const menuTitle = document.getElementById('menuTitle');
-        const menuDesc = document.getElementById('menuDesc');
-        const startBtn = document.getElementById('startBtn');
-        const whatsappSection = document.getElementById('whatsappSection');
-        const verifyCodeBtn = document.getElementById('verifyCodeBtn');
-        const secretCodeInput = document.getElementById('secretCodeInput');
-        const waErrorMsg = document.getElementById('waErrorMsg');
-
-        // Responsive Canvas
-        let cw, ch;
-        function resize() {
-            cw = canvas.width = window.innerWidth;
-            ch = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Game Constants & Variables
-        const GRAVITY = 0.4;      // was 0.45
-        const JUMP_POWER = -10.5; // was -11
-        const MOVE_SPEED = 7.5;   // was 6 (hızı artırdık)
-        
-
-        let score = 0;
-        let gameState = 'menu'; // menu, playing, gameover, won
-        let cameraY = 0;
-        let finalPlatformSpawned = false;
-
-        // Input tracking (Touch & Keyboard)
-        const keys = { left: false, right: false };
-        
-        // Touch Controls: Left half of screen = left, Right half = right
-        canvas.addEventListener('touchstart', (e) => {
-            if (gameState !== 'playing') return;
-            e.preventDefault();
-            for (let i = 0; i < e.touches.length; i++) {
-                const touchX = e.touches[i].clientX;
-                if (touchX < cw / 2) keys.left = true;
-                else keys.right = true;
-            }
-        }, {passive: false});
-
-        canvas.addEventListener('touchend', (e) => {
-            if (gameState !== 'playing') return;
-            e.preventDefault();
-            keys.left = false;
-            keys.right = false;
-            // Re-evaluate remaining touches
-            for (let i = 0; i < e.touches.length; i++) {
-                const touchX = e.touches[i].clientX;
-                if (touchX < cw / 2) keys.left = true;
-                else keys.right = true;
-            }
-        }, {passive: false});
-
-        canvas.addEventListener('touchmove', (e) => {
-            if (gameState !== 'playing') return;
-            e.preventDefault();
-            keys.left = false;
-            keys.right = false;
-            // Ekranda parmak kaydırıldığında da yönü güncelle
-            for (let i = 0; i < e.touches.length; i++) {
-                const touchX = e.touches[i].clientX;
-                if (touchX < cw / 2) keys.left = true;
-                else keys.right = true;
-            }
-        }, {passive: false});
-
-        // Keyboard Fallback for desktop testing
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-        });
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-        });
-
-        const player = {
-            x: cw / 2 - 20,
-            y: ch - 150,
-            width: 40,
-            height: 40,
-            vy: 0,
-            vx: 0,
-            color: '#ec4899', // Pinkish character
-            draw() {
-                // Draw a cute pixel-like blob character
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.roundRect(this.x, this.y, this.width, this.height, 10);
-                ctx.fill();
-                
-                // Eyes
-                ctx.fillStyle = 'white';
-                ctx.fillRect(this.x + 8, this.y + 10, 8, 8);
-                ctx.fillRect(this.x + 24, this.y + 10, 8, 8);
-                
-                ctx.fillStyle = 'black';
-                // Look direction based on velocity
-                let lookOffset = this.vx > 0 ? 2 : (this.vx < 0 ? -2 : 0);
-                ctx.fillRect(this.x + 10 + lookOffset, this.y + 12, 4, 4);
-                ctx.fillRect(this.x + 26 + lookOffset, this.y + 12, 4, 4);
-
-                // Little blush
-                ctx.fillStyle = 'rgba(255, 0, 100, 0.4)';
-                ctx.beginPath();
-                ctx.arc(this.x + 6, this.y + 22, 4, 0, Math.PI*2);
-                ctx.arc(this.x + 34, this.y + 22, 4, 0, Math.PI*2);
-                ctx.fill();
-            },
-            update() {
-                // Horizontal Movement
-                if (keys.left) this.vx = -MOVE_SPEED;
-                else if (keys.right) this.vx = MOVE_SPEED;
-                else this.vx *= 0.8; // Friction
-
-                this.x += this.vx;
-
-                // Screen Wrap
-                if (this.x > cw) this.x = -this.width;
-                if (this.x < -this.width) this.x = cw;
-
-                // Vertical Movement (Gravity)
-                this.vy += GRAVITY;
-                this.y += this.vy;
-            }
-        };
-
-        let platforms = [];
-        let collectibles = [];
-
-        function createPlatform(x, y, isFinal = false) {
-            // Zorluk arttıkça genişlik daralacak.
-            let difficulty = Math.min(score / 3000, 0.7); // 3000 puanda en zor
-            let baseW = cw < 600 ? 90 : 70;
-            let randW = cw < 600 ? 40 : 30;
-            let finalWidth = (baseW + Math.random() * randW) * (1 - difficulty);
-            if (finalWidth < 25) finalWidth = 25; // minimum genişlik
-            
-            return {
-                x: x,
-                y: y,
-                width: isFinal ? cw * 0.8 : finalWidth,
-                height: isFinal ? 40 : 15,
-                isFinal: isFinal,
-                draw() {
-                    if (this.isFinal) {
-                        // Draw Grand Platform
-                        ctx.fillStyle = '#fdf2f8'; // pink-50
-                        ctx.beginPath();
-                        ctx.roundRect(this.x, this.y, this.width, this.height, 20);
-                        ctx.fill();
-                        ctx.strokeStyle = '#fbcfe8'; // pink-200
-                        ctx.lineWidth = 4;
-                        ctx.stroke();
-                        
-                        // Heart in middle
-                        ctx.font = '30px Arial';
-                        ctx.fillText('❤️', this.x + this.width/2 - 15, this.y + 30);
-                    } else {
-                        // Normal platform
-                        ctx.fillStyle = '#38bdf8'; // sky-400
-                        ctx.beginPath();
-                        ctx.roundRect(this.x, this.y, this.width, this.height, 8);
-                        ctx.fill();
-                        // Top highlight
-                        ctx.fillStyle = '#7dd3fc'; // sky-300
-                        ctx.beginPath();
-                        ctx.roundRect(this.x, this.y, this.width, 5, 8);
-                        ctx.fill();
-                    }
-                }
-            };
-        }
-
-        function spawnInitialPlatforms() {
-            platforms = [];
-            collectibles = [];
-            // Floor platform
-            platforms.push(createPlatform(cw / 2 - 50, ch - 50));
-            
-            // Random platforms going up
-            let currentY = ch - 150;
-            while (currentY > 0) {
-                let x = Math.random() * (cw - 100);
-                platforms.push(createPlatform(x, currentY));
-                
-                // 15% chance to spawn a coffee collectible
-                if (Math.random() > 0.85) {
-                    collectibles.push({
-                        x: x + 20,
-                        y: currentY - 35,
-                        size: 24,
-                        collected: false
-                    });
-                }
-                currentY -= Math.random() * 50 + 70;
-            }
-        }
-
-        function initGame() {
-            score = 0;
-            cameraY = 0;
-            finalPlatformSpawned = false;
-            player.x = cw / 2 - 20;
-            player.y = ch - 150;
-            player.vy = 0;
-            player.vx = 0;
-            keys.left = false;
-            keys.right = false;
-            
-            spawnInitialPlatforms();
-            scoreDisplay.innerText = score;
-            gameState = 'playing';
-            menuScreen.classList.add('hidden');
-            menuScreen.classList.remove('flex');
-            winScreen.classList.add('hidden');
-            winScreen.classList.remove('flex');
-            winScreen.classList.remove('opacity-100');
-            
-            startBtn.classList.remove('hidden');
-            whatsappSection.classList.add('hidden');
-            whatsappSection.classList.remove('flex');
-            secretCodeInput.value = '';
-            waErrorMsg.classList.add('hidden');
-            
-            requestAnimationFrame(gameLoop);
-        }
-
-        function triggerWin() {
-            gameState = 'won';
-            winScreen.classList.remove('hidden');
-            winScreen.classList.add('flex');
-            setTimeout(() => {
-                winScreen.classList.add('opacity-100');
-                startConfetti();
-            }, 50);
-        }
-
-        function triggerGameOver() {
-            gameState = 'gameover';
-            menuTitle.innerText = "Düştün! 💔";
-            menuDesc.innerHTML = `Skorun: <b>${score}</b><br><br>Tekrar zıplamak için bana WhatsApp'tan mesaj atıp <b>gizli kodu</b> almalısın 😉`;
-            
-            startBtn.classList.add('hidden');
-            whatsappSection.classList.remove('hidden');
-            whatsappSection.classList.add('flex');
-            
-            menuScreen.classList.remove('hidden');
-            menuScreen.classList.add('flex');
-        }
-
-        function gameLoop() {
-            if (gameState !== 'playing') return;
-
-            ctx.clearRect(0, 0, cw, ch);
-
-            // Draw grid background for a cute look
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-            ctx.lineWidth = 1;
-            for(let i=0; i<cw; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, ch); ctx.stroke(); }
-            for(let i=0; i<ch; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(cw, i); ctx.stroke(); }
-
-            player.update();
-
-            // Camera Scroll & Score Math
-            let moveY = 0;
-            if (player.y < ch / 2) {
-                // Keep player in middle, move everything else down
-                moveY = (ch / 2) - player.y;
-                player.y = ch / 2;
-                
-                // Add to score based on distance travelled up (unless final plat spawned)
-                if(!finalPlatformSpawned) {
-                    score += Math.floor(moveY * 0.1);
-                    scoreDisplay.innerText = score;
-                }
-            }
-
-            // Move and draw collectibles
-            for (let i = collectibles.length - 1; i >= 0; i--) {
-                let c = collectibles[i];
-                c.y += moveY;
-                
-                // Collision with collectible
-                if (!c.collected && 
-                    player.x < c.x + c.size && player.x + player.width > c.x &&
-                    player.y < c.y + c.size && player.y + player.height > c.y) {
-                        c.collected = true;
-                        score += 50; // Bonus score
-                        scoreDisplay.innerText = score;
-                        // Pop effect could be added here
-                }
-
-                if (!c.collected) {
-                    ctx.font = '24px Arial';
-                    ctx.fillText('☕', c.x, c.y + 20); // Coffee emoji
-                }
-
-                // Remove off-screen collectibles
-                if (c.y > ch) collectibles.splice(i, 1);
-            }
-
-            // Move and draw platforms, detect collisions
-            let highestPlatformY = ch;
-            for (let i = platforms.length - 1; i >= 0; i--) {
-                let p = platforms[i];
-                p.y += moveY;
-                
-                if (p.y < highestPlatformY) highestPlatformY = p.y;
-
-                // Collision Detection (falling only)
-                if (player.vy > 0 && 
-                    player.x + player.width > p.x && 
-                    player.x < p.x + p.width && 
-                    player.y + player.height >= p.y && 
-                    player.y + player.height <= p.y + p.height + player.vy) {
-                        
-                        // Bounce!
-                        player.vy = JUMP_POWER;
-                        
-                        // If landed on final platform, WIN!
-                        if (p.isFinal) {
-                            triggerWin();
-                            return; // Stop game loop
-                        }
-                }
-
-                p.draw();
-
-                // Remove off-screen platforms
-                if (p.y > ch + 50) {
-                    platforms.splice(i, 1);
-                }
-            }
-
-            // Generate new platforms dynamically
-            if (!finalPlatformSpawned) {
-                while (highestPlatformY > 0) {
-                    // Puan arttıkça platformlar arası mesafe artar
-                    let difficulty = Math.min(score / 3000, 1);
-                    let gapMin = 60 + (difficulty * 50); // Maks 110
-                    let gapRand = 50 + (difficulty * 60); // Maks 110
-                    
-                    let newY = highestPlatformY - (Math.random() * gapRand + gapMin);
-                    let newX = Math.random() * (cw - 100);
-                    platforms.push(createPlatform(newX, newY));
-                    highestPlatformY = newY;
-
-                    if (Math.random() > 0.9) {
-                        collectibles.push({ x: newX + 20, y: newY - 35, size: 24, collected: false });
-                    }
-                }
-                // Oyun artık bitmiyor (win condition kaldırıldı)
-            }
-
-            player.draw();
-
-            // Game Over Check (Fell off screen)
-            if (player.y > ch) {
-                triggerGameOver();
-                return;
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Start Event
-        startBtn.addEventListener('click', initGame);
-
-        verifyCodeBtn.addEventListener('click', () => {
-            const code = secretCodeInput.value.trim();
-            // Gizli kodumuz "0904"
-            if (code === '0904') { 
-                initGame();
-            } else {
-                waErrorMsg.classList.remove('hidden');
-            }
-        });
-
-
-        const submitBtn = document.getElementById('submitBtn');
-        const phoneNumber = document.getElementById('phoneNumber');
-        const formContainer = document.getElementById('formContainer');
-        const successMsg = document.getElementById('successMsg');
-        const errorMsg = document.getElementById('errorMsg');
-
-        submitBtn.addEventListener('click', async () => {
-            const phone = phoneNumber.value.trim();
-            // Basic validation (just ensure it has numbers and min length)
-            if (phone.replace(/[^0-9]/g,"").length < 10) {
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-            errorMsg.classList.add('hidden');
-            
-            // Show loading state on button
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="animate-spin text-xl">⏳</span>';
-            submitBtn.disabled = true;
-
-            try {
-                if (auth && db) {
-                    // Strictly required: check auth
-                    if (!auth.currentUser) await signInAnonymously(auth);
-                    
-                    // Strictly required: specific public path
-                    const docRef = collection(db, 'artifacts', appId, 'public', 'data', 'dateSubmissions');
-                    await addDoc(docRef, {
-                        phone: phone,
-                        scoreReached: score,
-                        timestamp: new Date().toISOString()
-                    });
-                } else {
-                    // Mock delay for preview environment without Firebase
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-
-                // Success UI transition
-                formContainer.classList.add('hidden');
-                successMsg.classList.remove('hidden');
-                successMsg.classList.add('flex');
-
-            } catch (error) {
-                console.error("Submission failed:", error);
-                submitBtn.innerHTML = 'Bir Hata Oluştu, Tekrar Dene';
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Simple Confetti implementation for the Win Screen
-        const confettiCanvas = document.getElementById('confettiCanvas');
-        const cCtx = confettiCanvas.getContext('2d');
-        let confettis = [];
-
-        function startConfetti() {
-            confettiCanvas.width = winScreen.clientWidth;
-            confettiCanvas.height = winScreen.clientHeight;
-            
-            const colors = ['#f472b6', '#fb7185', '#60a5fa', '#facc15'];
-            for(let i=0; i<100; i++) {
-                confettis.push({
-                    x: Math.random() * confettiCanvas.width,
-                    y: Math.random() * -confettiCanvas.height,
-                    w: Math.random() * 10 + 5,
-                    h: Math.random() * 10 + 5,
-                    vx: Math.random() * 4 - 2,
-                    vy: Math.random() * 3 + 2,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    angle: Math.random() * 360,
-                    spin: Math.random() * 0.2 - 0.1
-                });
-            }
-            requestAnimationFrame(renderConfetti);
-        }
-
-        function renderConfetti() {
-            if (gameState !== 'won') return;
-            
-            cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-            let active = false;
-            
-            confettis.forEach(c => {
-                if (c.y < confettiCanvas.height) active = true;
-                c.x += c.vx;
-                c.y += c.vy;
-                c.angle += c.spin;
-                
-                cCtx.save();
-                cCtx.translate(c.x, c.y);
-                cCtx.rotate(c.angle);
-                cCtx.fillStyle = c.color;
-                cCtx.fillRect(-c.w/2, -c.h/2, c.w, c.h);
-                cCtx.restore();
-            });
-
-            if (active) requestAnimationFrame(renderConfetti);
-        }
-
-    </script>
 </body>
 </html>

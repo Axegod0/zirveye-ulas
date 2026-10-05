@@ -82,7 +82,7 @@
                 <a id="waLink" href="https://wa.me/905336775003?text=Düştüm!%20Tekrar%20oynamak%20istiyorum,%20gizli%20kodu%20alabilir%20miyim?" target="_blank" class="w-full py-3 px-6 bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-bold rounded-xl shadow-lg transition-transform transform active:scale-95 flex items-center justify-center gap-2">
                     <span>WhatsApp'tan Mesaj At</span>
                 </a>
-                <input type="text" id="secretCodeInput" placeholder="Gizli Kodu Gir (Örn: 0904)" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-200 transition-all text-center text-lg font-semibold text-gray-700">
+                <input type="text" id="secretCodeInput" placeholder="Gizli Kodu Gir" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-200 transition-all text-center text-lg font-semibold text-gray-700">
                 <button id="verifyCodeBtn" class="w-full py-3 px-6 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg transition-transform transform active:scale-95">
                     Kodu Onayla ve Zıpla!
                 </button>
@@ -174,9 +174,9 @@
         resize();
 
         // Game Constants & Variables
-        const GRAVITY = 0.45;
-        const JUMP_POWER = -11;
-        const MOVE_SPEED = 6;
+        const GRAVITY = 0.4;      // was 0.45
+        const JUMP_POWER = -10.5; // was -11
+        const MOVE_SPEED = 7.5;   // was 6 (hızı artırdık)
         const MAX_SCORE = 500;
         
         let score = 0;
@@ -279,7 +279,7 @@
             return {
                 x: x,
                 y: y,
-                width: isFinal ? cw * 0.8 : 70 + Math.random() * 30,
+                width: isFinal ? cw * 0.8 : (cw < 600 ? 90 + Math.random() * 40 : 70 + Math.random() * 30),
                 height: isFinal ? 40 : 15,
                 isFinal: isFinal,
                 draw() {
